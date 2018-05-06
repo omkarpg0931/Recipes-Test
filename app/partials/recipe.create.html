@@ -1,0 +1,24 @@
+<section class="recipe">
+    <ol class="breadcrumb">
+        <li><a href="#/">Recipe Khazana</a></li>
+        <li><a href="#/admin">Administration</a></li>
+        <li class="active">Create Recipe</li>
+    </ol>
+
+    <form name="EditPostForm">
+        <div class="form-group">
+            <label for="inputTitle">Title</label>
+            <input type="text" class="form-control" id="inputTitle" placeholder="Title" ng-model="recipe.title">
+        </div>
+        <div class="form-group">
+            <label for="textareaContent">Discription</label>
+            <textarea class="form-control" rows="19" id="textareaContent" ng-model="recipe.description"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="inputIngredients">Ingredients</label>
+            <input type="text" class="form-control" id="inputIngredients" placeholder="Ingredient 1, Ingredient 2, ..." ng-model="recipe.ingredients">
+        </div>
+        <button type="submit" class="btn btn-success" ng-click="save(recipe)">Save</button>
+    </form>
+
+</section>

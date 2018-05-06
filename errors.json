@@ -1,0 +1,12 @@
+{
+	"error" : {
+		"emptyFieldErr" : "Fields are missing",
+		"userExistsErr" : "User already registered",
+		"tryAgainErr" : "Something went wrong. Please try again",
+		"invalidEmailErr" : "Invalid email address",
+		"invalidCredentials" : "'Invalid username/password'"
+	},
+	"success" : {
+
+	}	
+}

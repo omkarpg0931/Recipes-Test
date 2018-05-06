@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "omkarpg",
+    "password": "qwerty123",
+    "database": "transerve-recipes",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

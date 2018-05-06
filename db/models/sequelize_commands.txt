@@ -1,0 +1,13 @@
+sequelize model:create --name users --attributes username:string,password:string,email_id:string,name:string,type:integer,profile_image_url:text,active:boolean
+
+sequelize model:create --name recipes --attributes title:string,image_url:string,discription:text,active:boolean
+
+sequelize model:create --name ingredients --attributes name:string
+
+sequelize model:create --name recipes_ingredients --attributes fk_recipe_id:integer,fk_ingredient_id:integer,measure:number,measurement_unit:string
+
+sequelize model:create --name recipes_comments --attributes fk_recipe_id:integer,fk_user_id:integer,comment:text
+
+
+
+
