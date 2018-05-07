@@ -27,7 +27,9 @@ Run gulp to build the scripts of the AngularJS app with: `gulp`
 
 ### Install Nodejs App
 
-Go to the api folder and install the dependencies: `npm install`
+Install the dependencies: `npm install`
+
+If you need to change port, go to bin folder and edit `www` file and set value for port to your port number
 
 Run the application: `npm start`
 
