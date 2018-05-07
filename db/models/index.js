@@ -29,6 +29,15 @@ Object.keys(db).forEach(modelName => {
   }
 });
 
+sequelize
+    .authenticate()
+    .then(function(err) {
+        logger.info("Connected to HEROKU ADDON POSTGRESQL Successfully");
+        logger.info("DATABASE ENVIRONMENT : ", env, ' USER : ', config.username);
+    }, function (err) {
+        logger.error('Unable to connect to the database:', err);
+    });
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
