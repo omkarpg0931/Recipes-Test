@@ -11,8 +11,8 @@ var recipesRouter = require('./routes/recipes');
 var app = express();
 
 // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "http://localhost");
@@ -26,10 +26,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(expressValidator());
 app.use(express.static(path.join(__dirname, 'app')));
 
-app.use('/api/users', usersRouter);
-app.use('/api/recipes', recipesRouter);
+// basic route
+app.get('/', function(req, res) {
+	res.redirect('/#/login');
+});
 
-app.get('*', function(req, res) {
+app.use('/api/user', usersRouter);
+app.use('/api/recipe', recipesRouter);
+
+app.get('/', function(req, res) {
   res.sendfile('./app/index.html'); // load the single view file (angular will handle the page changes on the front-end)
 });
 

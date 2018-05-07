@@ -63,15 +63,17 @@ exports.login = function(req, res) {
     } else if(!loginData.password) {
         res.status(401).send(errors.error.invalidCredentials);
     } else {
-        models.user.findOne({ where: {email: loginData.username},
+        models.user.findOne({ where: {email_id: loginData.username},
             attributes : ['name', 'password', 'email_id', 'id', 'is_admin'],
         })
-        .then(function(user) {
+        .then(function(user) {            
             if(!user) {
                 res.status(401).send(errors.error.invalidCredentials);
             } else {
                 var userData = user.get({plain : true});
+                
                 var match = bcrypt.compareSync(loginData.password, userData.password);
+                
                 if(match){
                     var user = {
                         'name' : userData.name,
@@ -83,6 +85,7 @@ exports.login = function(req, res) {
                         'token' : jwtToken.generateJwtToken(user),
                         'message': "Login Successful"
                     };
+
                     delete req.body
                     res.status(200).send(message);
                 } else {
@@ -90,8 +93,8 @@ exports.login = function(req, res) {
                 }
             }                
         }).catch(function (err) {
+            console.log(err);
             res.status(500).send('Internal server error');
-            apiLog.log(req, res)
         });
     }
 }

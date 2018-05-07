@@ -6,15 +6,18 @@ var appServices = angular.module('appServices', []);
 var appControllers = angular.module('appControllers', []);
 var appDirectives = angular.module('appDirectives', []);
 
-var options = {};
-options.api = {};
-options.api.base_url = "http://localhost:3000";
-
-
 app.config(['$locationProvider', '$routeProvider', 
   function($location, $routeProvider) {
-    $routeProvider.
-        when('/', {
+      $routeProvider.
+        when('/register', {
+            templateUrl: 'partials/register.html',
+            controller: 'UserCtrl'
+        }).
+        when('/login', {
+            templateUrl: 'partials/signin.html',
+            controller: 'UserCtrl'
+        }).
+        when('/list', {
             templateUrl: 'partials/recipe.list.html',
             controller: 'RecipeListCtrl'
         }).
@@ -26,14 +29,6 @@ app.config(['$locationProvider', '$routeProvider',
             templateUrl: 'partials/recipe.create.html',
             controller: 'RecipeCreateCtrl',
             access: { requiredAuthentication: true }
-        }).
-        when('/register', {
-            templateUrl: 'partials/register.html',
-            controller: 'UserCtrl'
-        }).
-        when('/login', {
-            templateUrl: 'partials/signin.html',
-            controller: 'UserCtrl'
         }).
         when('/logout', {
             templateUrl: 'partials/logout.html',
@@ -60,6 +55,10 @@ app.run(function($rootScope, $location, $window, AuthenticationService) {
         }
     });
 });
+
+appControllers.controller('appController', ['$rootScope', function appController($rootScope) {
+	$rootScope.showLogout = false;
+}]);
 
 appControllers.controller('RecipeListCtrl', ['$scope', '$sce', 'RecipeService',
     function RecipeListCtrl($scope, $sce, RecipeService) {
@@ -96,8 +95,8 @@ appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$locatio
     }
 ]);
 
-appControllers.controller('RecipeCreateCtrl', ['$scope', '$location', 'RecipeService',
-    function RecipeCreateCtrl($scope, $location, RecipeService) {
+appControllers.controller('RecipeCreateCtrl', ['$scope', '$rootScope', '$location', 'RecipeService',
+    function RecipeCreateCtrl($scope, $rootScope, $location, RecipeService) {
         $('#textareaContent').wysihtml5({"font-styles": false});
         $('#inputIngredients').wysihtml5({"font-styles": false});
 
@@ -113,7 +112,7 @@ appControllers.controller('RecipeCreateCtrl', ['$scope', '$location', 'RecipeSer
                     recipe.ingredients = ingredients
 
                     RecipeService.create(recipe).success(function(data) {
-                        $location.path("/");
+                        $location.path("/list");
                     }).error(function(status, data) {
                         console.log(status);
                         console.log(data);
@@ -124,8 +123,8 @@ appControllers.controller('RecipeCreateCtrl', ['$scope', '$location', 'RecipeSer
     }
 ]);
 
-appControllers.controller('UserCtrl', ['$scope', '$location', '$window', 'UserService', 'AuthenticationService',  
-    function UserCtrl($scope, $location, $window, UserService, AuthenticationService) {
+appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$window', 'UserService', 'AuthenticationService',  
+    function UserCtrl($scope, $rootScope, $location, $window, UserService, AuthenticationService) {
 
         //Admin User Controller (signIn, logOut)
         $scope.signIn = function signIn(username, password) {
@@ -134,7 +133,8 @@ appControllers.controller('UserCtrl', ['$scope', '$location', '$window', 'UserSe
                 UserService.signIn(username, password).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     $window.sessionStorage.token = data.token;
-                    $location.path("/");
+                    $rootScope.showLogout = true;
+                    $location.path("/list");
                 }).error(function(status, data) {
                     console.log(status);
                     console.log(data);
@@ -148,7 +148,8 @@ appControllers.controller('UserCtrl', ['$scope', '$location', '$window', 'UserSe
                 UserService.logOut().success(function(data) {
                     AuthenticationService.isAuthenticated = false;
                     delete $window.sessionStorage.token;
-                    $location.path("/");
+                    $rootScope.showLogout = false;
+                    $location.path("/login");
                 }).error(function(status, data) {
                     console.log(status);
                     console.log(data);
@@ -159,12 +160,12 @@ appControllers.controller('UserCtrl', ['$scope', '$location', '$window', 'UserSe
             }
         }
 
-        $scope.register = function register(name, emailId, password, passwordConfirm) {
+        $scope.register = function register(fullName, emailId, password, passwordConfirm) {
             if (AuthenticationService.isAuthenticated) {
-                $location.path("/");
+                $location.path("/list");
             }
             else {
-                UserService.register(name, emailId, password, passwordConfirm).success(function(data) {
+                UserService.register(fullName, emailId, password, passwordConfirm).success(function(data) {
                     $location.path("/login");
                 }).error(function(status, data) {
                     console.log(status);
@@ -240,15 +241,19 @@ appServices.factory('TokenInterceptor', function ($q, $window, $location, Authen
 appServices.factory('RecipeService', function($http) {
     return {
         read: function(id) {
-            return $http.get(options.api.base_url + '/recipe/?id=' + id);
+            return $http.get('/api/recipe/?id=' + id);
+        },
+
+        comment: function (id) {
+            return $http.post('/api/recipe/comment?id=' + id);
         },
         
         findAll: function() {
-            return $http.get(options.api.base_url + '/recipe/all');
+            return $http.get('/api/recipe/all');
         },
 
         create: function(recipe) {
-            return $http.recipe(options.api.base_url + '/recipe', {'recipe': recipe});
+            return $http.post('/api/recipe', {'recipe': recipe});
         }
     };
 });
@@ -256,15 +261,15 @@ appServices.factory('RecipeService', function($http) {
 appServices.factory('UserService', function ($http) {
     return {
         signIn: function(username, password) {
-            return $http.post(options.api.base_url + '/user/login', {username: username, password: password});
+            return $http.post('/api/user/login', {username: username, password: password});
         },
 
         logOut: function() {
-            return $http.get(options.api.base_url + '/user/logout');
+            return $http.get('/api/user/logout');
         },
 
-        register: function(name, emailId, password, passwordConfirmation) {
-            return $http.post(options.api.base_url + '/user/register', {name:name, email_id: emailId, password: password, password_confirmation: passwordConfirmation });
+        register: function(fullName, emailId, password, passwordConfirmation) {
+            return $http.post('/api/user/register', {name:fullName, email_id: emailId, password: password, password_confirmation: passwordConfirmation });
         }
     }
 });

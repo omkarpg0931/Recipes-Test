@@ -9,8 +9,8 @@ var config    = require(__dirname + '/../../config/config.json')[env];
 var db        = {};
 
 let sequelize = new Sequelize(
-    config.database, config.username, config.password, config
-  );
+  config.database, config.username, config.password, config
+);
 
 
 fs
@@ -30,13 +30,13 @@ Object.keys(db).forEach(modelName => {
 });
 
 sequelize
-    .authenticate()
-    .then(function(err) {
-        console.log("Connected to HEROKU ADDON POSTGRESQL Successfully");
-        console.log("DATABASE ENVIRONMENT : ", env, ' USER : ', config.username);
-    }, function (err) {
-        console.error('Unable to connect to the database:', err);
-    });
+  .authenticate()
+  .then(function(err) {
+    console.log("Connected to HEROKU ADDON POSTGRESQL Successfully");
+    console.log("DATABASE ENVIRONMENT : ", env, ' USER : ', config.username);
+  }, function (err) {
+    console.error('Unable to connect to the database:', err);
+  });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

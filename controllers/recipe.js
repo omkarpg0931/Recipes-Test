@@ -4,6 +4,7 @@ var models = require("../db/models");
 var errors = require('../errors.json');
 var _ = require('../helpers/lodash.js');
 var fileHelper = require('../helpers/fileupload.js');
+var tokenHelper = require('../helpers/token.js');
 
 function addNewRecipe(recipe) {
     models.recipe.create(recipe)
@@ -11,6 +12,16 @@ function addNewRecipe(recipe) {
         var pickKeys = ['id'];	
         return null, _.pick(result.dataValues, pickKeys);
     }).catch(function(err) {
+        return err, null;
+    });
+}
+
+function addRecipeComment(comment) {
+    models.recipe_comment.create(comment)
+    .then(function (result) {
+        var pickKeys = ['id'];
+        return null, _.pick(result.dataValues, pickKeys);
+    }).catch(function (err) {
         return err, null;
     });
 }
@@ -58,6 +69,42 @@ exports.create = function(req, res) {
 	}
 };
 
+exports.addComment = function (req, res) {
+    var commentData = req.body;
+    var error = null
+    var data = []
+    var keys = ['comment', 'id'];
+    if (!recipeData) {
+        res.status(400).send(errors.error.emptyFieldErr);
+        return;
+    } else {
+        async.waterfall([
+            function (callback) {
+                var token = getToken(req.headers.Authorization);
+                decoded_token = tokenHelper.decodeToken(token)
+                return callback(null, decoded_token)
+            },
+            function (decoded_token, callback) {
+                commentData = _.keysRequired(keys, commentData);             
+                commentData.fk_user_id = decoded_token.id;
+                commentData.fk_recipe_id = commentData.id;
+                error, addedRecipe = addRecipeComment(commentData);
+                if (error) {
+                    return callback(error, null)
+                } else {
+                    return callback(null, addedRecipe)
+                }
+            },
+        ], function (err, addedRecipe) {
+            if (err) {
+                res.status(err.code).send(err.message);
+            } else {
+                res.status(200).send(addedRecipe);
+            }
+        });
+    }
+};
+
 exports.viewRecipe = function(req, res) {
     var reqParams = req.query;
 
@@ -86,7 +133,6 @@ exports.viewRecipe = function(req, res) {
             }                
         }).catch(function (err) {
             res.status(500).send('Internal server error');
-            apiLog.log(req, res)
         });
     }
 }
@@ -104,6 +150,5 @@ exports.viewRecipesList = function(req, res) {
         }                
     }).catch(function (err) {
         res.status(500).send('Internal server error');
-        apiLog.log(req, res)
     });
 }
