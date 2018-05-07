@@ -4,13 +4,21 @@
     "password": "qwerty123",
     "database": "transerve-recipes",
     "host": "127.0.0.1",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "ssl": false,
+    "dialectOptions": {
+        "ssl": false
+    }
   },
   "production": {
     "username": "wykxmmiadlcstw",
     "password": "e6bdbb47f61cb73afcc9624fdb0a7b19f60a3a07cce3c37186ea3f58c5d5bbf0",
     "database": "datk5ja2t4o3d6",
     "host": "ec2-54-204-44-140.compute-1.amazonaws.com",
-    "dialect": "postgres"
+    "dialect": "postgres",
+    "ssl": true,
+    "dialectOptions": {
+        "ssl": true
+    }
   }
 }
