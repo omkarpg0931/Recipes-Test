@@ -16,7 +16,7 @@
         <link href="lib/wysiwyg/css/bootstrap3-wysiwyg5.css" rel="stylesheet">
     </head>
   
-    <body ng-app="app">
+    <body ng-app="app" ng-controller="mainCtrl">
         <div>
             <div class="navside dark dk" layout="column">
                 <div class="navbar">
@@ -24,11 +24,11 @@
                         <span class="inline">Recipe Khazana</span>
                     </a>
                 </div>
-                <div ng-show="showCreate">
+                <div ng-show="$root.showCreate">
                     <a id="recipe_create" class="md-btn md-raised m-b-sm w-xs " href="#/recipe/create">Post Recipe</a>
                 </div>
             
-                <div  ng-show="showLogout">
+                <div  ng-show="$root.showLogout">
                     <a id="sign_out" class="sign-out-btn md-btn md-raised m-b-sm w-xs red " href="#/logout">SIGNOUT</a>
                 </div>
             </div>

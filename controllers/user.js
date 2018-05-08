@@ -83,6 +83,7 @@ exports.login = function(req, res) {
 
                     message = {
                         'token' : jwtToken.generateJwtToken(user),
+                        'user_type' : userData.is_admin,
                         'message': "Login Successful"
                     };
 

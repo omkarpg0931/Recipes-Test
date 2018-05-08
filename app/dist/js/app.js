@@ -57,11 +57,17 @@ app.run(function($rootScope, $location, $window, AuthenticationService) {
     });
 });
 
+appControllers.controller('mainCtrl', ['$scope', '$rootScope',
+    function MainCtrl($scope, $rootScope) {
+
+    }
+]);
+
 appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$window', 'RecipeService',
     function RecipeListCtrl($scope, $rootScope, $sce, $window, RecipeService) {
 
         $scope.recipes = [];
-        if ($window.sessionStorage.user_type){
+        if ($window.sessionStorage.user_type && $window.sessionStorage.user_type== 'true'){
             $rootScope.showCreate = true
         }
 
@@ -165,7 +171,7 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
                     AuthenticationService.isAuthenticated = true;
                     $window.sessionStorage.token = data.token;
                     $rootScope.showLogout = true;
-                    $window.sessionStorage.setItem("user_type", true);
+                    $window.sessionStorage.setItem("user_type", data.user_type);
                     $location.path("/list");
                 }).error(function(status, data) {
                     console.log(status);
