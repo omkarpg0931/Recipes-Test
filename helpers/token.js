@@ -15,17 +15,22 @@ exports.checkIfValid = function (token) {
 }
 
 exports.checkAuth = function (req, res, next) {
-	var token = getToken(req.headers);
+	var token = req.headers['authorization'];	
+	// var token = getToken(req.headers);
 	try{
 		var decoded = jwt.verify(token, SECRET);
+		console.log(decoded);
+		
 		if (decoded.user_type){
 			next();
 		} 
 		else{
-			return res.send(401);
+			return res.sendStatus(401);
 		}
 	} catch (err) {
-		return res.send(500);
+		console.log(err);
+		
+		return res.sendStatus(500);
 	}
 	
 };

@@ -1,8 +1,6 @@
 <section class="recipe">
     <ol class="breadcrumb">
-        <li><a href="#/">Recipe Khazana</a></li>
-        <li><a href="#/admin">Administration</a></li>
-        <li class="active">Create Recipe</li>
+        <li class="active">Add Recipe</li>
     </ol>
 
     <form name="EditPostForm">
@@ -18,7 +16,19 @@
             <label for="inputIngredients">Ingredients</label>
             <input type="text" class="form-control" id="inputIngredients" placeholder="Ingredient 1, Ingredient 2, ..." ng-model="recipe.ingredients">
         </div>
-        <button type="submit" class="btn btn-success" ng-click="save(recipe)">Save</button>
+        <div class="form-group row">
+            <label class="col-sm-1 form-control-label">Upload Picture</label>
+            <div class="col-sm-4">
+                <input type="file" ngf-select ng-model="file" name="file"
+                       ngf-pattern="'image/*'"
+                       ngf-accept="'image/*'"
+                       ngf-max-size="20MB">
+            </div>
+            <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url">
+                <img alt="user" style="width: 250px; height: 250px;"  class="img-responsive"  src="{{recipe.image_url}}" /> 
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success" ng-click="save(recipe, file)">Save</button>
     </form>
 
 </section>

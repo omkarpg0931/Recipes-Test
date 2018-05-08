@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   var recipe = sequelize.define('recipe', {
     title: DataTypes.STRING,
     image_url: DataTypes.STRING,
-    discription: DataTypes.TEXT,
+    description: DataTypes.TEXT,
     ingredients: DataTypes.TEXT,
     active: {
       type : DataTypes.BOOLEAN,

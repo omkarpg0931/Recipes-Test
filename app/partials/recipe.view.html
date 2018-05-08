@@ -1,7 +1,7 @@
 <section class="recipe">
     <header class="recipe-header">
-        <h2 class="recipe-title"><a href="#/recipe/{{recipe._id}}">{{recipe.title}}</a></h2>
-        <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.created | date:'medium'}}</div>
+        <h2 class="recipe-title"><a href="#/recipe/{{recipe.id}}">{{recipe.title}}</a></h2>
+        <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.createdAt | date:'medium'}}</div>
     </header>
     <div class="recipe-content">
         <h4 class="recipe-headers"><a>Description: </a></h4>
@@ -10,6 +10,13 @@
     <div class="recipe-content">
         <h4 class="recipe-headers"><a>Ingredients: </a></h4>
         <p ng-bind-html="recipe.ingredients"></p>
+    </div>
+    <div class="recipe-content">
+        <h4 class="recipe-headers"><a>Comments: </a></h4>
+        <p ng-bind-html="recipe.ingredients"></p>
+        <div class="recipe-content" ng-repeat="comment in comments">
+
+        </div>
     </div>
     <footer class="recipe-footer">
     </footer>

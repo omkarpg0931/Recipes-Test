@@ -1,12 +1,12 @@
 <section class="recipe" ng-repeat="recipe in recipes">
     <header class="recipe-header">
-        <h2 class="recipe-title"><a href="#/recipe/{{recipe._id}}">{{recipe.title}}</a></h2>
-        <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.created | date:'medium'}}</div>
+        <h2 class="recipe-title"><a href="#/recipe/{{recipe.id}}">{{recipe.title}}</a></h2>
+        <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.createdAt | date:'medium'}}</div>
     </header>
     <div class="recipe-content">
         <p ng-bind-html="recipe.content">
             {{recipe.description}}
         </p>
-        <a href="#/recipe/{{recipe._id}}" class="btn btn-primary">Read More</a>
+        <a href="#/recipe/{{recipe.id}}" class="btn btn-primary">Read More</a>
     </div>
 </section>

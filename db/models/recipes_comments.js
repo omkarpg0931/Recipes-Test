@@ -4,7 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     fk_recipe_id: DataTypes.INTEGER,
     fk_user_id: DataTypes.INTEGER,
     comment: DataTypes.TEXT
-  }, {});
+  }, {
+    tableName: 'recipes_comments'
+  });
   recipe_comment.associate = function(models) {
     // associations can be defined here
     recipe_comment.belongsTo(models.user, {

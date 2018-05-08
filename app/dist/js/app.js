@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute', 'appControllers', 'appServices', 'appDirectives'])
+var app = angular.module('app', ['ngRoute', 'appControllers', 'appServices', 'appDirectives', 'ngFileUpload'])
 
 var appServices = angular.module('appServices', []);
 var appControllers = angular.module('appControllers', []);
@@ -12,6 +12,11 @@ app.config(['$locationProvider', '$routeProvider',
         when('/register', {
             templateUrl: 'partials/register.html',
             controller: 'UserCtrl'
+        }).
+        when('/recipe/create', {
+            templateUrl: 'partials/recipe.create.html',
+            controller: 'RecipeCtrl',
+            access: { requiredAuthentication: false }
         }).
         when('/login', {
             templateUrl: 'partials/signin.html',
@@ -25,15 +30,10 @@ app.config(['$locationProvider', '$routeProvider',
             templateUrl: 'partials/recipe.view.html',
             controller: 'RecipeViewCtrl'
         }).
-        when('/recipe/create', {
-            templateUrl: 'partials/recipe.create.html',
-            controller: 'RecipeCreateCtrl',
-            access: { requiredAuthentication: true }
-        }).
         when('/logout', {
             templateUrl: 'partials/logout.html',
             controller: 'UserCtrl',
-            access: { requiredAuthentication: true }
+            access: { requiredAuthentication: false }
         }).
         otherwise({
             redirectTo: '/login'
@@ -41,36 +41,41 @@ app.config(['$locationProvider', '$routeProvider',
 }]);
 
 
-app.config(function ($httpProvider) {
+app.config(function ($httpProvider) {    
     $httpProvider.interceptors.push('TokenInterceptor');
 });
 
 app.run(function($rootScope, $location, $window, AuthenticationService) {
     $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
+        
         //redirect only if both isAuthenticated is false and no token is set
         if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
             && !AuthenticationService.isAuthenticated && !$window.sessionStorage.token) {
-
-            $location.path("/login");
-        }
+            
+                $location.path("/login");
+        } 
     });
 });
 
-appControllers.controller('appController', ['$rootScope', function appController($rootScope) {
-	$rootScope.showLogout = false;
-}]);
-
-appControllers.controller('RecipeListCtrl', ['$scope', '$sce', 'RecipeService',
-    function RecipeListCtrl($scope, $sce, RecipeService) {
+appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$window', 'RecipeService',
+    function RecipeListCtrl($scope, $rootScope, $sce, $window, RecipeService) {
 
         $scope.recipes = [];
+        if ($window.sessionStorage.user_type){
+            $rootScope.showCreate = true
+        }
 
+        if ($window.sessionStorage.token){
+            $rootScope.showLogout = true
+        }
         RecipeService.findAll().success(function(data) {
+            console.log(data);
+            
             for (var key in data) {
                 data[key].description = $sce.trustAsHtml(data[key].description);
             }
 
-            $scope.recipes = data;            
+            $scope.recipes = data;
         }).error(function(data, status) {
             console.log(status);
             console.log(data);
@@ -78,16 +83,28 @@ appControllers.controller('RecipeListCtrl', ['$scope', '$sce', 'RecipeService',
     }
 ]);
 
-appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$location', '$sce', 'RecipeService',
-    function RecipeViewCtrl($scope, $routeParams, $location, $sce, RecipeService) {
+appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$rootScope', '$location', '$sce', '$window', 'RecipeService',
+    function RecipeViewCtrl($scope, $routeParams, $rootScope, $location, $sce, $window, RecipeService) {
 
         $scope.recipe = {};
-        var id = $routeParams.id;
+        $scope.comments = []
 
+        var id = $routeParams.id;
+        if ($window.sessionStorage.user_type){
+            $rootScope.showCreate = true
+        }
+
+        if ($window.sessionStorage.token){
+            $rootScope.showLogout = true
+        }
         RecipeService.read(id).success(function(data) {
             data.description = $sce.trustAsHtml(data.description);
             data.ingredients = $sce.trustAsHtml(data.ingredients);
+            console.log(data);
+            $scope.comments = data.recipe_comments
+            
             $scope.recipe = data;
+
         }).error(function(data, status) {
             console.log(status);
             console.log(data);
@@ -95,45 +112,60 @@ appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$locatio
     }
 ]);
 
-appControllers.controller('RecipeCreateCtrl', ['$scope', '$rootScope', '$location', 'RecipeService',
-    function RecipeCreateCtrl($scope, $rootScope, $location, RecipeService) {
-        $('#textareaContent').wysihtml5({"font-styles": false});
-        $('#inputIngredients').wysihtml5({"font-styles": false});
+appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '$window', 'RecipeService',
+    function RecipeCtrl($scope, $rootScope, $location , $window, RecipeService) {
 
-        $scope.save = function save(recipe) {
-            if (recipe != undefined 
-                && recipe.title != undefined) {
+        $rootScope.showCreate = false;
 
-                var description = $('#textareaContent').val();
-                var ingredients = $('#inputIngredients').val();
-                if (description != undefined) {
-                    recipe.description = description;
+        if ($window.sessionStorage.token){
+            $rootScope.showLogout = true;
+        }
+        if (!$window.sessionStorage.user_type) {
+            $location.path("/list");
+        } else{
+            $scope.recipe = {}
+            $scope.recipe.image_url = false
+            $('#textareaContent').wysihtml5({"font-styles": false});
+            $('#inputIngredients').wysihtml5({"font-styles": false});
+            $scope.save = function save(recipe, file) {              
+                
+                if (recipe != undefined 
+                    && recipe.title != undefined) {
 
-                    recipe.ingredients = ingredients
+                    var description = $('#textareaContent').val();
+                    var ingredients = $('#inputIngredients').val();
+                    if (description != undefined) {
+                        recipe.description = description;
 
-                    RecipeService.create(recipe).success(function(data) {
-                        $location.path("/list");
-                    }).error(function(status, data) {
-                        console.log(status);
-                        console.log(data);
-                    });
+                        recipe.ingredients = ingredients
+
+                        RecipeService.create(recipe, file).success(function(data) {
+                            $location.path("/list");
+                        }).error(function(status, data) {
+                            console.log(status);
+                            console.log(data);
+                        });;
+                    }
                 }
             }
-        }
+        }      
     }
 ]);
 
 appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$window', 'UserService', 'AuthenticationService',  
     function UserCtrl($scope, $rootScope, $location, $window, UserService, AuthenticationService) {
-
-        //Admin User Controller (signIn, logOut)
+        $rootScope.showLogout = false;
+        $rootScope.showCreate = false;
+        // User Controller (signIn, logOut)
         $scope.signIn = function signIn(username, password) {
-            if (username != null && password != null) {
 
+            if (username != null && password != null) {
+                
                 UserService.signIn(username, password).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     $window.sessionStorage.token = data.token;
                     $rootScope.showLogout = true;
+                    $window.sessionStorage.setItem("user_type", true);
                     $location.path("/list");
                 }).error(function(status, data) {
                     console.log(status);
@@ -143,17 +175,13 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
         }
 
         $scope.logOut = function logOut() {
-            if (AuthenticationService.isAuthenticated) {
-                
-                UserService.logOut().success(function(data) {
-                    AuthenticationService.isAuthenticated = false;
-                    delete $window.sessionStorage.token;
-                    $rootScope.showLogout = false;
-                    $location.path("/login");
-                }).error(function(status, data) {
-                    console.log(status);
-                    console.log(data);
-                });
+            if (AuthenticationService.isAuthenticated) {                
+                AuthenticationService.isAuthenticated = false;
+                delete $window.sessionStorage.token;
+                delete $window.sessionStorage.user_type;
+                $rootScope.showLogout = false;
+                $rootScope.showCreate = false;
+                $location.path("/login");
             }
             else {
                 $location.path("/login");
@@ -194,6 +222,7 @@ appDirectives.directive('displayMessage', function() {
         }
 	}
 });
+
 appServices.factory('AuthenticationService', function() {
     var auth = {
         isAuthenticated: false,
@@ -206,9 +235,10 @@ appServices.factory('AuthenticationService', function() {
 appServices.factory('TokenInterceptor', function ($q, $window, $location, AuthenticationService) {
     return {
         request: function (config) {
+            
             config.headers = config.headers || {};
             if ($window.sessionStorage.token) {
-                config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+                config.headers.Authorization = $window.sessionStorage.token;
             }
             return config;
         },
@@ -228,9 +258,7 @@ appServices.factory('TokenInterceptor', function ($q, $window, $location, Authen
         /* Revoke client authentication if 401 is received */
         responseError: function(rejection) {
             if (rejection != null && rejection.status === 401 && ($window.sessionStorage.token || AuthenticationService.isAuthenticated)) {
-                delete $window.sessionStorage.token;
-                AuthenticationService.isAuthenticated = false;
-                $location.path("/login");
+                $location.path("/list");
             }
 
             return $q.reject(rejection);
@@ -252,8 +280,16 @@ appServices.factory('RecipeService', function($http) {
             return $http.get('/api/recipe/all');
         },
 
-        create: function(recipe) {
-            return $http.post('/api/recipe', {'recipe': recipe});
+        create: function(recipe,file) {
+            var fd = new FormData();
+            fd.append('file', file);
+
+            fd.append('data', angular.toJson(recipe));
+
+            return $http.post('/api/recipe', fd, {
+                transformRequest: angular.identity,
+                headers: {'Content-Type': undefined}
+            });
         }
     };
 });
