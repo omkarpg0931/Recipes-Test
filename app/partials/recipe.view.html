@@ -3,6 +3,9 @@
         <h2 class="recipe-title"><a href="#/recipe/{{recipe.id}}">{{recipe.title}}</a></h2>
         <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.createdAt | date:'medium'}}</div>
     </header>
+    <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url" style="float: right;position: relative;right: 10vw">
+        <img alt="user" style="width: 400px; height: 400px;"  class="img-responsive"  src="{{recipe.image_url}}" />
+    </div>
     <div class="recipe-content">
         <h4 class="recipe-headers"><a>Description: </a></h4>
         <p ng-bind-html="recipe.description"></p>
@@ -19,18 +22,18 @@
                     "{{comment.comment}}"
                     <cite>-
                         <b>{{comment.user.name}}</b>
+                        on
+                        <a >{{comment.createdAt | date:"y-MMM-dd hh:mm"}}</a>
                     </cite>
                 </li>
             </ul>
+            </br>
             <form name="commentForm" ng-submit="addComment(recipe.id, newComment)" novalidate>
                 <h4>Add Comment</h4>
-                <textarea ng-model="newComment" cols="30" rows="10" required></textarea>        
-                <input type="submit" value="Submit" />
+                <textarea ng-model="newComment" cols="30" rows="10" placeholder="Comment here.. should be greater than 10 characters" required></textarea>        
+                <button type="submit" class="btn btn-success" value="Submit">Submit</button>
             </form>
         </div>
-    </div>
-    <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url" style="float: right;position: relative;top: -50vh;">
-        <img alt="user" style="width: 250px; height: 250px;"  class="img-responsive"  src="{{recipe.image_url}}" />
     </div>
     <footer class="recipe-footer">
     </footer>

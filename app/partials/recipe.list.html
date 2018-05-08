@@ -4,7 +4,8 @@
         <div class="recipe-meta"><i class="fa fa-bullseye"></i> Posted on {{recipe.createdAt | date:'medium'}}</div>
     </header>
     <div class="recipe-content">
-        <p ng-bind-html="recipe.content">
+        <h4 class="recipe-headers"><a>Description: </a></h4>
+        <p ng-bind-html="recipe.description">
             {{recipe.description}}
         </p>
         <a href="#/recipe/{{recipe.id}}" class="btn btn-primary">Read More</a>

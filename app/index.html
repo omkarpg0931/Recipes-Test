@@ -13,31 +13,45 @@
     <title>Recipe Khazana</title>
     <link href="dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="dist/css/style.css" rel="stylesheet">
+    <link href="dist/css/toaster.min.css" rel="stylesheet">
     <link href="dist/css/font-awesome.min.css" rel="stylesheet">
     <link href="lib/wysiwyg/css/bootstrap3-wysiwyg5.css" rel="stylesheet">
     <link href="lib/wysiwyg/css/bootstrap3-wysiwyg5-color.css" rel="stylesheet">
 </head>
 
+<style>
+    .jumbotron { 
+        background-color: #f4511e; /* Orange */
+        color: #ffffff;
+    }
+    .nav {
+        border: 0;
+    }
+
+</style>
+
 <body ng-app="app" ng-controller="mainCtrl">
+    <toaster-container toaster-options="{'time-out': 3000}"></toaster-container>
     <div>
         <div class="navside dark dk" layout="column">
-            <div class="navbar">
-                <a class="navbar-brand">
-                    <span class="inline">Recipe Khazana</span>
-                </a>
+            <div class="jumbotron text-center">
+                <h1>Recipe Khazana</h1> 
             </div>
-            <ul class="nav nav-tabs list-inline"></ul>
-            <div ng-show="$root.showCreate">
-                <a id="recipe_create" class="md-btn md-raised m-b-sm w-xs " href="#/recipe/create">Post Recipe</a>
-            </div>
-            <div ng-show="$root.showLogout">
-                <a id="show_list" class="md-btn md-raised m-b-sm w-xs " href="#/list">Recipe List</a>
-            </div>
+            <div class="container">
+                <ul class="nav nav-tabs">
+                    <li ng-show="$root.showLogout">
+                        <a id="show_list" class="btn btn-default btn-lg" href="#/list"  ng-class="{active: $root.$route.current.activetab == 'list'}">Recipe List</a>
+                    </li>
 
-            <div ng-show="$root.showLogout">
-                <a id="sign_out" class="sign-out-btn md-btn md-raised m-b-sm w-xs red " href="#/logout">SIGNOUT</a>
+                    <li ng-show="$root.showCreate">
+                        <a id="recipe_create" class="btn btn-default btn-lg" href="#/recipe/create" ng-class="{active: $root.$route.current.activetab == 'create_recipe'}">Post Recipe</a>
+                    </li>
+                    
+                    <li ng-show="$root.showLogout" class="pull-right">
+                        <a id="sign_out" class="sign-out-btn btn btn-default btn-lg " href="#/logout" >SIGNOUT</a>
+                    </li>
+                </ul>
             </div>
-            </ul>
         </div>
         <div id="content" class="app-content box-shadow-z0">
             <div ng-view></div>
@@ -46,6 +60,7 @@
 
     <script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular/angular-route.min.js"></script>
+    <script src="lib/angular/toaster.min.js"></script>
     <script src="lib/angular/ng-file-upload-shim.js"></script>
     <script src="lib/angular/ng-file-upload.js"></script>
     <script src="lib/angular/ng-file-upload-shim.min.js"></script>

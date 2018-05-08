@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('app', ['ngRoute', 'appControllers', 'appServices', 'appDirectives', 'ngFileUpload'])
+var app = angular.module('app', ['ngRoute', 'toaster','appControllers', 'appServices', 'appDirectives', 'ngFileUpload'])
 
 var appServices = angular.module('appServices', []);
 var appControllers = angular.module('appControllers', []);
@@ -16,6 +16,7 @@ app.config(['$locationProvider', '$routeProvider',
         when('/recipe/create', {
             templateUrl: 'partials/recipe.create.html',
             controller: 'RecipeCtrl',
+            activetab: 'create_recipe',
             access: { requiredAuthentication: false }
         }).
         when('/login', {
@@ -24,7 +25,8 @@ app.config(['$locationProvider', '$routeProvider',
         }).
         when('/list', {
             templateUrl: 'partials/recipe.list.html',
-            controller: 'RecipeListCtrl'
+            controller: 'RecipeListCtrl',
+            activetab: 'list'
         }).
         when('/recipe/:id', {
             templateUrl: 'partials/recipe.view.html',
@@ -33,6 +35,7 @@ app.config(['$locationProvider', '$routeProvider',
         when('/logout', {
             templateUrl: 'partials/logout.html',
             controller: 'UserCtrl',
+            activetab: 'logout',
             access: { requiredAuthentication: false }
         }).
         otherwise({
@@ -47,13 +50,31 @@ app.config(function ($httpProvider) {
 
 app.run(function($rootScope, $location, $window, AuthenticationService) {
     $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
-        
-        //redirect only if both isAuthenticated is false and no token is set
-        if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
-            && !AuthenticationService.isAuthenticated && !$window.sessionStorage.token) {
-            
+       
+        if (nextRoute != null && (nextRoute.originalPath === "/register" || nextRoute.originalPath === "/login") && $window.sessionStorage.user_type && $window.sessionStorage.user_type== 'false'){
+            $location.path("/");
+        }
+
+        if (nextRoute != null &&nextRoute.originalPath === "/recipe/create" && $window.sessionStorage.user_type && $window.sessionStorage.user_type== 'false'){
+            if (currentRoute != null){
+                $location.path(currentRoute.originalPath);
+            } else{
                 $location.path("/login");
-        } 
+            }
+        } else {
+            //redirect only if both isAuthenticated is false and no token is set
+            if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
+                && !AuthenticationService.isAuthenticated && !$window.sessionStorage.token) {
+                    $location.path("/login");
+                    toaster.pop({
+                        type: 'error',
+                        body: 'Unauthorised Request',
+                        timeout: 6000
+                    });
+            } 
+        }
+        
+        
     });
 });
 
@@ -63,9 +84,11 @@ appControllers.controller('mainCtrl', ['$scope', '$rootScope',
     }
 ]);
 
-appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$window', 'RecipeService',
-    function RecipeListCtrl($scope, $rootScope, $sce, $window, RecipeService) {
-
+appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$route', '$sce', '$window', 'toaster', 'RecipeService',
+    function RecipeListCtrl($scope, $rootScope, $route, $sce, $window, toaster, RecipeService) {
+        $rootScope.showLogout = false;
+        $rootScope.showCreate = false;
+        $rootScope.$route = $route;
         $scope.recipes = [];
         if ($window.sessionStorage.user_type && $window.sessionStorage.user_type== 'true'){
             $rootScope.showCreate = true
@@ -74,8 +97,8 @@ appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$w
         if ($window.sessionStorage.token){
             $rootScope.showLogout = true
         }
+
         RecipeService.findAll().success(function(data) {
-            console.log(data);
             
             for (var key in data) {
                 data[key].description = $sce.trustAsHtml(data[key].description);
@@ -83,6 +106,11 @@ appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$w
 
             $scope.recipes = data;
         }).error(function(data, status) {
+            toaster.pop({
+                type: 'error',
+                body: data.message || data,
+                timeout: 6000
+            });
             console.log(status);
             console.log(data);
         });
@@ -91,9 +119,12 @@ appControllers.controller('RecipeListCtrl', ['$scope', '$rootScope', '$sce', '$w
 
 appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$rootScope', '$location', '$sce', '$window', 'RecipeService',
     function RecipeViewCtrl($scope, $routeParams, $rootScope, $location, $sce, $window, RecipeService) {
+        $rootScope.showLogout = false;
+        $rootScope.showCreate = false;
 
         $scope.recipe = {};
-        $scope.comments = []
+        $scope.comments = [];
+        $scope.date=new Date();
 
         var id = $routeParams.id;
         if ($window.sessionStorage.user_type){
@@ -118,19 +149,23 @@ appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$rootSco
     }
 ]);
 
-appControllers.controller('CommentController', ['$scope', '$routeParams', '$rootScope', '$location', '$sce', '$window', 'RecipeService',
-    function CommentController($scope, $routeParams, $rootScope, $location, $sce, $window, RecipeService)  {
-
-        if ($window.sessionStorage.token) {
-            $rootScope.showLogout = true
-        }
+appControllers.controller('CommentController', ['$scope', '$routeParams', '$rootScope', '$location', '$sce', '$window', 'toaster', 'RecipeService',
+    function CommentController($scope, $routeParams, $rootScope, $location, $sce, $window,  toaster, RecipeService)  {
         $scope.addComment = function addComment(id, comment) {
             if (comment.length > 10){
                 RecipeService.comment(id, comment).success(function (data) {
                     $location.path("/list");
-                    alert("Comment successfully added")
+                    toaster.pop({
+                        type: 'success',
+                        body: "Comment successfully added"
+                    });
                 }).error(function (data, status) {
-                    alert("Server Error, Please Try again")
+                    toaster.pop({
+                        type: 'error',
+                        body: "Server Error, Please Try again",
+                        timeout: 6000
+                    });
+                    // alert("Server Error, Please Try again")
                 });
             }
             
@@ -138,11 +173,16 @@ appControllers.controller('CommentController', ['$scope', '$routeParams', '$root
     }
 ]);
 
-appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '$window', 'RecipeService',
-    function RecipeCtrl($scope, $rootScope, $location , $window, RecipeService) {
-
+appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$route', '$location' , '$window',  'toaster', 'RecipeService',
+    function RecipeCtrl($scope, $rootScope, $route, $location , $window,  toaster, RecipeService) {
+        $rootScope.showLogout = false;
         $rootScope.showCreate = false;
 
+        $rootScope.$route = $route;
+        if ($window.sessionStorage.user_type){
+            $rootScope.showCreate = true
+        }
+        
         if ($window.sessionStorage.token){
             $rootScope.showLogout = true;
         }
@@ -167,7 +207,16 @@ appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '
 
                         RecipeService.create(recipe, file).success(function(data) {
                             $location.path("/list");
-                        }).error(function(status, data) {
+                            toaster.pop({
+                                type: 'success',
+                                body: "Recipe successfully posted"
+                            });
+                        }).error(function(data, status) {
+                            toaster.pop({
+                                type: 'error',
+                                body: data.message || data,
+                                timeout: 6000
+                            });
                             console.log(status);
                             console.log(data);
                         });;
@@ -178,24 +227,40 @@ appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '
     }
 ]);
 
-appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$window', 'UserService', 'AuthenticationService',  
-    function UserCtrl($scope, $rootScope, $location, $window, UserService, AuthenticationService) {
+appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$window',  'toaster', 'UserService', 'AuthenticationService',  
+    function UserCtrl($scope, $rootScope, $location, $window,  toaster, UserService, AuthenticationService) {
         $rootScope.showLogout = false;
         $rootScope.showCreate = false;
+
+        if ($window.sessionStorage.user_type){
+            $rootScope.showCreate = true
+        }
+        
+        if ($window.sessionStorage.token){
+            $rootScope.showLogout = true;
+        }
+        
         // User Controller (signIn, logOut)
         $scope.signIn = function signIn(username, password) {
 
             if (username != null && password != null) {
                 
                 UserService.signIn(username, password).success(function(data) {
-
-                    alert("Successfully logged in")
                     AuthenticationService.isAuthenticated = true;
                     $window.sessionStorage.token = data.token;
                     $rootScope.showLogout = true;
                     $window.sessionStorage.setItem("user_type", data.user_type);
                     $location.path("/list");
-                }).error(function(status, data) {
+                    toaster.pop({
+                        type: 'success',
+                        body: "Successfully logged in!"
+                    });
+                }).error(function(data, status) {
+                    toaster.pop({
+                        type: 'error',
+                        body: data.message || data,
+                        timeout: 6000
+                    });
                     console.log(status);
                     console.log(data);
                 });
@@ -204,13 +269,16 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
 
         $scope.logOut = function logOut() {
             if (AuthenticationService.isAuthenticated) { 
-                alert("Successfully logged out")               
                 AuthenticationService.isAuthenticated = false;
                 delete $window.sessionStorage.token;
                 delete $window.sessionStorage.user_type;
                 $rootScope.showLogout = false;
                 $rootScope.showCreate = false;
                 $location.path("/login");
+                toaster.pop({
+                    type: 'success',
+                    body: "Successfully logged Out!"
+                });
             }
             else {
                 $location.path("/login");
@@ -222,10 +290,18 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
                 $location.path("/list");
             }
             else {
-                UserService.register(fullName, emailId, password, passwordConfirm).success(function (data) {
-                    alert("Successfully registered.")        
+                UserService.register(fullName, emailId, password, passwordConfirm).success(function (data) {      
                     $location.path("/login");
-                }).error(function(status, data) {
+                    toaster.pop({
+                        type: 'success',
+                        body: "Successfully Registered!"
+                    });
+                }).error(function(data, status) {
+                    toaster.pop({
+                        type: 'error',
+                        body: data.message || data,
+                        timeout: 6000
+                    });
                     console.log(status);
                     console.log(data);
                 });
