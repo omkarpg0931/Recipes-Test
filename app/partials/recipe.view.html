@@ -14,11 +14,24 @@
     <div class="recipe-content">
         <h4 class="recipe-headers"><a>Comments: </a></h4>
         <p ng-bind-html="recipe.ingredients"></p>
-        <div class="recipe-content" ng-repeat="comment in comments">
-
+        <div class="comments" ng-controller="CommentController">
+            <h3>Comments</h3>
+            <ul>
+                <li ng-repeat="comment in comments">
+                    "{{comment.comment}}"
+                    <cite>-
+                        <b>{{comment.user.name}}</b>
+                    </cite>
+                </li>
+            </ul>
+            <form name="commentForm" ng-submit="addComment(recipe.id, newComment)" novalidate>
+                <h4>Add Comment</h4>
+                <textarea ng-model="newComment" cols="30" rows="10" required></textarea>        
+                <input type="submit" value="Submit" />
+            </form>
         </div>
     </div>
-    <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url" style="float: right;position: relative;top: -35vh;">
+    <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url" style="float: right;position: relative;top: -50vh;">
         <img alt="user" style="width: 250px; height: 250px;"  class="img-responsive"  src="{{recipe.image_url}}" />
     </div>
     <footer class="recipe-footer">

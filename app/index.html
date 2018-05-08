@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="Recipe Web App">
-        <meta name="author" content="Omkar PG">
-        <meta name="fragment" content="!">
 
-        <title>Recipe Khazana</title>
-        <link href="dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="dist/css/style.css" rel="stylesheet">
-        <link href="dist/css/font-awesome.min.css" rel="stylesheet">
-        <link href="lib/wysiwyg/css/bootstrap3-wysiwyg5.css" rel="stylesheet">
-    </head>
-  
-    <body ng-app="app" ng-controller="mainCtrl">
-        <div>
-            <div class="navside dark dk" layout="column">
-                <div class="navbar">
-                    <a class="navbar-brand">
-                        <span class="inline">Recipe Khazana</span>
-                    </a>
-                </div>
-                <div ng-show="$root.showCreate">
-                    <a id="recipe_create" class="md-btn md-raised m-b-sm w-xs " href="#/recipe/create">Post Recipe</a>
-                </div>
-                <div ng-show="$root.showLogout">
-                    <a id="show_list" class="md-btn md-raised m-b-sm w-xs " href="#/list">Recipe List</a>
-                </div>
-            
-                <div  ng-show="$root.showLogout">
-                    <a id="sign_out" class="sign-out-btn md-btn md-raised m-b-sm w-xs red " href="#/logout">SIGNOUT</a>
-                </div>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Recipe Web App">
+    <meta name="author" content="Omkar PG">
+    <meta name="fragment" content="!">
+
+    <title>Recipe Khazana</title>
+    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="dist/css/style.css" rel="stylesheet">
+    <link href="dist/css/font-awesome.min.css" rel="stylesheet">
+    <link href="lib/wysiwyg/css/bootstrap3-wysiwyg5.css" rel="stylesheet">
+</head>
+
+<body ng-app="app" ng-controller="mainCtrl">
+    <div>
+        <div class="navside dark dk" layout="column">
+            <div class="navbar">
+                <a class="navbar-brand">
+                    <span class="inline">Recipe Khazana</span>
+                </a>
             </div>
-            <div id="content" class="app-content box-shadow-z0">
-                <div ng-view></div>
+            <ul class="nav nav-tabs list-inline"></ul>
+            <div ng-show="$root.showCreate">
+                <a id="recipe_create" class="md-btn md-raised m-b-sm w-xs " href="#/recipe/create">Post Recipe</a>
             </div>
+            <div ng-show="$root.showLogout">
+                <a id="show_list" class="md-btn md-raised m-b-sm w-xs " href="#/list">Recipe List</a>
+            </div>
+
+            <div ng-show="$root.showLogout">
+                <a id="sign_out" class="sign-out-btn md-btn md-raised m-b-sm w-xs red " href="#/logout">SIGNOUT</a>
+            </div>
+            </ul>
         </div>
+        <div id="content" class="app-content box-shadow-z0">
+            <div ng-view></div>
+        </div>
+    </div>
 
-        <script src="lib/angular/angular.min.js"></script>
-        <script src="lib/angular/angular-route.min.js"></script>
-        <script src="lib/angular/ng-file-upload-shim.js"></script>
-        <script src="lib/angular/ng-file-upload.js"></script>
-        <script src="lib/angular/ng-file-upload-shim.min.js"></script>
-        <script src="lib/angular/ng-file-upload.min.js"></script>
-        <script src="lib/jquery/jquery-2.0.3.min.js"></script>
-        <script src="lib/bootstrap/bootstrap.min.js"></script>
-        <script src="dist/js/app.js"></script>
-        <script src="lib/wysiwyg/js/wysihtml5-0.3.0.min.js"></script>
-        <script src="lib/wysiwyg/js/bootstrap3-wysihtml5.js"></script>
-    </body>
+    <script src="lib/angular/angular.min.js"></script>
+    <script src="lib/angular/angular-route.min.js"></script>
+    <script src="lib/angular/ng-file-upload-shim.js"></script>
+    <script src="lib/angular/ng-file-upload.js"></script>
+    <script src="lib/angular/ng-file-upload-shim.min.js"></script>
+    <script src="lib/angular/ng-file-upload.min.js"></script>
+    <script src="lib/jquery/jquery-2.0.3.min.js"></script>
+    <script src="lib/bootstrap/bootstrap.min.js"></script>
+    <script src="dist/js/app.js"></script>
+    <script src="lib/wysiwyg/js/wysihtml5-0.3.0.min.js"></script>
+    <script src="lib/wysiwyg/js/bootstrap3-wysihtml5.js"></script>
+</body>
+
 </html>

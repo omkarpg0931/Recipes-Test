@@ -8,7 +8,6 @@ var tokenHelper = require('../helpers/token.js');
 const qs = require('querystring');
 
 function addNewRecipe(recipe, file) {
-    console.log(recipe);
     
     models.recipe.create(recipe)
     .then(function(result) {
@@ -45,7 +44,6 @@ exports.create = function(req, res) {
                 file = req.files.file;
             }
             recipeData = JSON.parse(recipeData.data)
-            console.log(recipeData);
             
             var data = {
                 "description":recipeData.description,
@@ -53,9 +51,7 @@ exports.create = function(req, res) {
                 "ingredients": recipeData.ingredients
             }
             err, addedRecipe = addNewRecipe(data, file);
-            if (err) {
-                console.log(err);
-                
+            if (err) {               
                 res.status(err.code).send(err.message);
             } else {				
                 res.status(200).send(addedRecipe);
@@ -73,7 +69,7 @@ exports.addComment = function (req, res) {
     var error = null
     var data = []
     var keys = ['comment', 'id'];
-    if (!recipeData) {
+    if (!commentData) {
         res.status(400).send(errors.error.emptyFieldErr);
         return;
     } else {
@@ -84,21 +80,24 @@ exports.addComment = function (req, res) {
                 return callback(null, decoded_token)
             },
             function (decoded_token, callback) {
-                commentData = _.keysRequired(keys, commentData);             
-                commentData.fk_user_id = decoded_token.id;
-                commentData.fk_recipe_id = commentData.id;
-                error, addedRecipe = addRecipeComment(commentData);
+                
+                var data = {
+                    "comment": commentData.comment,
+                    "fk_user_id" : decoded_token.id,
+                    "fk_recipe_id" : commentData.id,
+                }
+                error, addedComment = addRecipeComment(data);
                 if (error) {
                     return callback(error, null)
                 } else {
-                    return callback(null, addedRecipe)
+                    return callback(null, addedComment)
                 }
             },
-        ], function (err, addedRecipe) {
+        ], function (err, addedComment) {
             if (err) {
                 res.status(err.code).send(err.message);
             } else {
-                res.status(200).send(addedRecipe);
+                res.status(200).send(addedComment);
             }
         });
     }
@@ -129,7 +128,6 @@ exports.viewRecipe = function(req, res) {
                     res.status(401).send("Recipe not found");
                 } else {
                     userData = recipeData.get({plain : true});
-                    console.log(userData);
                     
                     res.status(200).send(recipeData);
                 }                
@@ -139,7 +137,7 @@ exports.viewRecipe = function(req, res) {
         
         }
     } catch (error){
-        console.log(error);
+        res.status(500).send('Internal server error');
         
     }
 }
@@ -155,9 +153,7 @@ exports.viewRecipesList = function(req, res) {
         } else {
             res.status(200).send(recipeData);
         }                
-    }).catch(function (err) {
-        console.log(err);
-        
+    }).catch(function (err) {        
         res.status(500).send('Internal server error');
     });
 }

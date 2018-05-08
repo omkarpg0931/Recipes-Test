@@ -10,6 +10,8 @@ router.get('/', recipeController.viewRecipe);
 
 router.get('/all', recipeController.viewRecipesList);
 
+router.post('/comment', recipeController.addComment);
+
 router.post('/', tokenHelper.checkAuth, multipartyMiddleware, recipeController.create);
 
 module.exports = router;

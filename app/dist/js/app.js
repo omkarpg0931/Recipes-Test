@@ -118,6 +118,26 @@ appControllers.controller('RecipeViewCtrl', ['$scope', '$routeParams', '$rootSco
     }
 ]);
 
+appControllers.controller('CommentController', ['$scope', '$routeParams', '$rootScope', '$location', '$sce', '$window', 'RecipeService',
+    function CommentController($scope, $routeParams, $rootScope, $location, $sce, $window, RecipeService)  {
+
+        if ($window.sessionStorage.token) {
+            $rootScope.showLogout = true
+        }
+        $scope.addComment = function addComment(id, comment) {
+            if (comment.length > 10){
+                RecipeService.comment(id, comment).success(function (data) {
+                    $location.path("/list");
+                    alert("Comment successfully added")
+                }).error(function (data, status) {
+                    alert("Server Error, Please Try again")
+                });
+            }
+            
+        }
+    }
+]);
+
 appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '$window', 'RecipeService',
     function RecipeCtrl($scope, $rootScope, $location , $window, RecipeService) {
 
@@ -133,8 +153,8 @@ appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '
             $scope.recipe.image_url = false
             $('#textareaContent').wysihtml5({"font-styles": false});
             $('#inputIngredients').wysihtml5({"font-styles": false});
-            $scope.save = function save(recipe, file) {              
-                
+            $scope.save = function save(recipe, file) {                
+            
                 if (recipe != undefined 
                     && recipe.title != undefined) {
 
@@ -154,7 +174,7 @@ appControllers.controller('RecipeCtrl', ['$scope', '$rootScope', '$location' , '
                     }
                 }
             }
-        }      
+        }
     }
 ]);
 
@@ -168,6 +188,8 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
             if (username != null && password != null) {
                 
                 UserService.signIn(username, password).success(function(data) {
+
+                    alert("Successfully logged in")
                     AuthenticationService.isAuthenticated = true;
                     $window.sessionStorage.token = data.token;
                     $rootScope.showLogout = true;
@@ -181,7 +203,8 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
         }
 
         $scope.logOut = function logOut() {
-            if (AuthenticationService.isAuthenticated) {                
+            if (AuthenticationService.isAuthenticated) { 
+                alert("Successfully logged out")               
                 AuthenticationService.isAuthenticated = false;
                 delete $window.sessionStorage.token;
                 delete $window.sessionStorage.user_type;
@@ -199,7 +222,8 @@ appControllers.controller('UserCtrl', ['$scope', '$rootScope', '$location', '$wi
                 $location.path("/list");
             }
             else {
-                UserService.register(fullName, emailId, password, passwordConfirm).success(function(data) {
+                UserService.register(fullName, emailId, password, passwordConfirm).success(function (data) {
+                    alert("Successfully registered.")        
                     $location.path("/login");
                 }).error(function(status, data) {
                     console.log(status);
@@ -278,8 +302,8 @@ appServices.factory('RecipeService', function($http) {
             return $http.get('/api/recipe/?id=' + id);
         },
 
-        comment: function (id) {
-            return $http.post('/api/recipe/comment?id=' + id);
+        comment: function (id, comment) {
+            return $http.post('/api/recipe/comment', { "id": id, "comment": comment});
         },
         
         findAll: function() {
