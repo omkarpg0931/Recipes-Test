@@ -24,9 +24,6 @@
                        ngf-accept="'image/*'"
                        ngf-max-size="20MB">
             </div>
-            <div class="col-sm-4 col-sm-offset-1" ng-if="recipe.image_url">
-                <img alt="user" style="width: 250px; height: 250px;"  class="img-responsive"  src="{{recipe.image_url}}" /> 
-            </div>
         </div>
         <button type="submit" class="btn btn-success" ng-click="save(recipe, file)">Save</button>
     </form>

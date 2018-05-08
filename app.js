@@ -26,6 +26,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(expressValidator());
 app.use(express.static(path.join(__dirname, 'app')));
 
+app.get('/favicon.ico', (req, res) => res.status(204));
+
 // basic route
 app.get('/', function(req, res) {
 	res.redirect('/#/login');
